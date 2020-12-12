@@ -115,7 +115,7 @@ def biomassVSoda(df_biomas, df_oda, name, paths):
         df_biomas_oda.at[index, 'ODa'] = aux[columns_names_oda[1]]
 
     x = df_biomas_oda['ODa']
-    print('asdfasd', columns_names_bio)
+
     y = df_biomas_oda[columns_names_bio[1]]
     poppet, _ = curve_fit(lineal, x, y)
     a, b = poppet  # Coefficients of y = a x + b
