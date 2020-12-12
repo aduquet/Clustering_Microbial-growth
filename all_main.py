@@ -1,23 +1,21 @@
 import os
 import pathlib
-import pandas as pd
-import numpy as np
+import warnings
 import glob as gl
-import math
+import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit
+
 from numpy import log as ln
 from sklearn.cluster import KMeans
+from scipy.optimize import curve_fit
 from sklearn.linear_model import LinearRegression
+from matplotlib.axes._axes import _log as matplotlib_axes_logger
 from sklearn.metrics import silhouette_samples, silhouette_score
 from sklearn.preprocessing import StandardScaler  # For scaling dataset
 from yellowbrick.cluster import kelbow_visualizer, KElbowVisualizer
-from matplotlib.axes._axes import _log as matplotlib_axes_logger
 
 matplotlib_axes_logger.setLevel('ERROR')
-
-import warnings
-
 warnings.filterwarnings('ignore')
 
 """
@@ -77,13 +75,13 @@ def plotBIOMAS_ODA_vsTime(df_biomas, df_oda, name, paths):
     name_oda = 'ODa Vs Time - ' + name
     fig_oda = plt.figure(name_oda)
     ax_oda = fig_oda.gca()
-    # df_oda.plot(kind='scatter', x=columns_names_oda[0], y=columns_names_oda[1], ax=ax_oda)
+    df_oda.plot(kind='scatter', x=columns_names_oda[0], y=columns_names_oda[1], ax=ax_oda)
     df_oda.plot(kind='line', x=columns_names_oda[0], y=columns_names_oda[1], ax=ax_oda)
     plt.axis([0, df_oda[columns_names_oda[0]].max() + 5, 0, df_oda[columns_names_oda[1]].max() + 5])
     ax_oda.legend_ = None
     xticks_oda = ax_oda.xaxis.get_major_ticks()
     xticks_oda[0].label1.set_visible(False)
-    # plt.grid()
+
     save_plot(name_oda, paths, '.pdf')
 
 
@@ -143,7 +141,6 @@ def biomassVSoda(df_biomas, df_oda, name, paths):
     xticks[0].label1.set_visible(False)
     plt.xlabel('ODa')
     plt.ylabel('Biomass')
-    # plt.grid()
 
     save_plot(name_bioVSoda, paths, '.pdf')
 
@@ -212,7 +209,7 @@ def mu(df_gDCW, name, paths):
     mu = df_gDCW_mu['mu']
     bio = df_gDCW_mu['gDCWL']
 
-    ax1_bio.set_xlabel('Time (H)')
+    ax1_bio.set_xlabel('Time (h)')
     ax1_bio.set_ylabel('Biomass (gdcw/L)')
     ax1_bio.plot(t, bio)  # in case you want to change the plot color, add color= 'some color'
     ax1_bio.tick_params(axis='y')
@@ -240,7 +237,7 @@ def mu(df_gDCW, name, paths):
     mu = df_gDCW_mu['mu']
     bio = df_gDCW_mu['gDCWL']
 
-    ax1_bio.set_xlabel('Time (H)')
+    ax1_bio.set_xlabel('Time (h)')
     ax1_bio.set_ylabel('Biomass (gdcw/L)')
     ax1_bio.plot(t, bio)  # in case you want to change the plot color, add color= 'some color'
     ax1_bio.tick_params(axis='y')
@@ -252,13 +249,10 @@ def mu(df_gDCW, name, paths):
     ax2_mu.scatter(t[2:], mu[2:], color='peru', s=15)
     ax2_mu.tick_params(axis='y')
     fig_bio.tight_layout()  # otherwise the right y-label is slightly clipped
-
     ax1_bio.set_xlim(0.0, len(t))
-    ax1_bio.set_ylim(ymin=0)
     ax2_mu.set_ylim(ymin=0)
     plt.grid()
-
-    plt.savefig(name_mu)
+    save_plot(name_mu, paths, '.pdf')
 
     return df_gDCW_mu
 
@@ -268,7 +262,69 @@ def Kmeans(X, n_clusters):
     model.fit(X)
     cluster_labels = model.predict(X)
     cent = model.cluster_centers_
-    return cluster_labels, cent
+    inertia = model.inertia_
+
+    return cluster_labels, cent, inertia
+
+
+def k_optimal_silhouetteCoffin(x, ini):
+    range_n_clusters = np.arange(ini, 15)  # Possibles K optimos
+    aux = []
+    for n_clusters in range_n_clusters:
+        label, cent, inert = Kmeans(x, n_clusters)
+        silhouette_avg = silhouette_score(x, label)
+        aux.append(silhouette_avg)
+    return range_n_clusters, aux
+
+
+def k_optimal_inertia(x):
+    range_n_clusters = np.arange(1, 15)
+    inertia_vec = []
+    for i in range(1, len(range_n_clusters)):
+        label, cent, inertia = Kmeans(x[['Time (h)', 'mu']], i)
+        inertia_vec.append(inertia)
+    return inertia_vec
+
+
+def R_sq_optimiser(df, R_sq_old):
+    global a, r_df, n_df, inter, slope
+    model = LinearRegression()
+    ind=0
+    for i in range(1, len(df)):
+        n_df = df.copy()
+        n_df = n_df[i:]
+
+        y = n_df['gDCWL-ln'].array
+        x = n_df['Time (h)'].to_numpy()
+        x = x.reshape((-1, 1))
+        model.fit(x, y)
+        R_sq = model.score(x, y)
+        if R_sq > R_sq_old:
+            R_sq_old = R_sq
+            r_df = n_df[ind:].copy()
+            inter = model.intercept_
+            slope = model.coef_
+            a = i
+        else:
+            break
+
+    for j in reversed(np.arange(a, len(r_df))):
+        n_df = r_df.copy()
+        n_df = n_df[:j]
+        y = n_df['gDCWL-ln'].array
+        x = n_df['Time (h)'].to_numpy()
+        x = x.reshape((-1, 1))
+        model.fit(x, y)
+        R_sq = model.score(x, y)
+
+        if R_sq > R_sq_old:
+            R_sq_old = R_sq
+            inter = model.intercept_
+            slope = model.coef_
+        else:
+            break
+
+    return R_sq_old, slope, inter, n_df
 
 
 def mu_Max(df_gDCW_mu, name, paths):
@@ -276,7 +332,7 @@ def mu_Max(df_gDCW_mu, name, paths):
      :param df_gDCW_mu: Main DataFrame which should contain the following columns: Time (h), Oda, gDCWL, and mu
      :param name: This variable contains ID name, which will the ID of the plot generated
      :param paths: This is the paths in which all the files generated will be saved """
-    print(df_gDCW_mu.keys())
+    # print(df_gDCW_mu.keys())
 
     log10_Oda = df_gDCW_mu.copy()
     log10_Oda['gDCWL-ln'] = 0.0
@@ -302,139 +358,145 @@ def mu_Max(df_gDCW_mu, name, paths):
     xticks_ = ax.xaxis.get_major_ticks()
     xticks_[0].label1.set_visible(False)
     slash = r'/'
-    plt.ylabel('Biomass (gDCW ' + slash + ' L)')
+    plt.ylabel('Biomass (gDCW ' + slash + ' L) (log_10)')
     save_plot(name, paths, '.pdf')
 
-    n_clusters = 3
-    cluster_labels, cent = Kmeans(log10_Oda[['gDCWL', 'mu']], n_clusters)
+    range_n_clusters, opt_k = k_optimal_silhouetteCoffin(log10_Oda[['Time (h)', 'gDCWL']], 2)
+    n_clusters = range_n_clusters[opt_k.index(np.max(opt_k))]
+
+    cluster_labels, cent, inert = Kmeans(log10_Oda[['gDCWL', 'mu']], n_clusters)
     kmeans = pd.DataFrame(cluster_labels)
     log10_Oda.insert((log10_Oda.shape[1]), 'regions', kmeans)
 
-    targets = [0, 1, 2]
+    targets = np.arange(0, log10_Oda['regions'].max() + 1)
     ax.set_xlabel('Time (h)')
-    colors = ['coral', 'g', 'y']
-    leg = ['Biomass', 'Reg 1', 'Reg 2', 'Reg 3']
-    for target, colors in zip(targets, colors):
-        if target == 0:
-            m = '.'
-        if target == 1:
-            m = 'v'
-        if target == 2:
-            m = '<'
+    colors = plt.cm.rainbow(np.linspace(0, 1, len(targets)))
+    f_leg = 'Biomass (gDCW' + slash + ' L)'
+    leg = [f_leg]
 
+    for target, colors in zip(targets, colors):
+        leg_name = 'Region ' + str(int(target + 1))
+        leg.append(leg_name)
         indicesToKeep = log10_Oda['regions'] == target
         ax.scatter(log10_Oda.loc[indicesToKeep, 'Time (h)']
                    , log10_Oda.loc[indicesToKeep, 'gDCWL']
                    , color=colors,
-                   marker=m)
+                   marker='.', alpha=0.8)
         ax.set_yscale("log", nonposy='clip')
-    for i in range(0, len(targets)):
-        targets[i] = targets[i] + 1
-    ax.legend(leg)
 
+    ax.legend(leg)
+    save_plot(name, paths, '.pdf')
     # Lineal Model
     model = LinearRegression()
+    R_sq = []
+    inter = []
+    slope = []
 
-    reg1 = log10_Oda.copy()
-    reg1.drop(reg1[reg1['regions'] != 0].index, inplace=True)  # Sub-select the rows belonging to the region 1 only
-    y = reg1['gDCWL-ln'].array
-    x = reg1['Time (h)'].to_numpy()
-    x = x.reshape((-1, 1))
-    model.fit(x, y)
-    new_y_reg1 = model.predict(x)
-    ax.scatter(x, new_y_reg1, color='r', s=40, marker='.')
+    for i in range(0, n_clusters):
+        reg = log10_Oda.copy()
+        reg.drop(reg[reg['regions'] != i].index, inplace=True)  # Sub-select the rows belonging to the region 1 only
+        y = reg['gDCWL-ln'].array
+        x = reg['Time (h)'].to_numpy()
+        x = x.reshape((-1, 1))
+        model.fit(x, y)
 
-    reg1_r_sq = model.score(x, y)
-    reg1_inter = model.intercept_
-    reg1_slope = model.coef_
-    print('Region 1 Rsq', reg1_r_sq)
-    print('Region 1 intercept', reg1_inter)
-    print('Region 1 slope', reg1_slope)
+        R_sq.append(model.score(x, y))
+        inter.append(model.intercept_)
+        slope.append(model.coef_)
 
-    reg2 = log10_Oda.copy()
-    reg2.drop(reg2[reg2['regions'] != 1].index, inplace=True)  # Sub-select the rows belonging to the region 2 only
+    region = slope.index(np.max(slope))
+    R_sq_final = R_sq[region]
+    bestRegion = log10_Oda.copy()
+    bestRegion.drop(bestRegion[bestRegion['regions'] != region].index, inplace=True)
+    inter_final = inter[region]
+    slope_final = slope[region]
+    R_sq_opt, slope_opt, inter_opt, df_final = R_sq_optimiser(bestRegion, R_sq_final)
+    # print(R_sq_opt, slope_opt, inter_opt, df_final)
+    # print(R_sq, slope, inter)
+    # print(region, R_sq_final, slope_final, inter_final)
 
-    x_reg2 = reg2['Time (h)'].to_numpy()
-    x_reg2 = x_reg2.reshape((-1, 1))
-    y_reg2 = reg2['gDCWL-ln'].array
+    columns_names = list(log10_Oda.columns)
+    name = 'mu_Max' + name
+    fig_muMax = plt.figure(name)
+    ax_muMax = fig_muMax.gca()
+    bestRegion.plot(kind='line', x=columns_names[0], y=columns_names[2], ax=ax_muMax, label= 'Biomass')
+    df_final.plot(kind='scatter', x=columns_names[0], y=columns_names[2], ax=ax_muMax, marker = '.', label='y = %.5f '
+                                                                                                           '* x + '
+                                                                                                           '%.5f '
+                                                                                                           '\n\nR'
+                                                                                                           '-squared '
+                                                                                                           '= %.5f '
+                                                                                                           '\n'
+                                                                                                           '\nmu_Max '
+                                                                                                           '= %.5f '
+                                                                                                           % (slope_opt, inter_opt, R_sq_opt, slope_opt), color='red', s=40)
+    ax_muMax.set_yscale("log", nonposy='clip')
+    ax_muMax.set_xlabel('Time (H)')
+    ax_muMax.set_ylabel('Biomass (gdcw/L) (log_10)')
+    plt.axis([0, bestRegion[columns_names[0]].max() + 5, 0,
+              bestRegion[columns_names[2]].max() + 5])
+    xticks_ = ax_muMax.xaxis.get_major_ticks()
+    xticks_[0].label1.set_visible(False)
+    save_plot(name, paths, '.pdf')
+    name = paths + '\\' + name.replace(' ', '') + '.csv'
+    log10_Oda.to_csv(name)
+    muMax = slope_opt
 
-    model.fit(x_reg2, y_reg2)
-    reg2_r_sq = model.score(x_reg2, y_reg2)
-    reg2_inter = model.intercept_
-    reg2_slope = model.coef_
-    new_y_reg2 = model.predict(x_reg2)
-    ax.scatter(x_reg2, new_y_reg2, color='r', s=40, marker='.')
-    print('Region 2 Rsq', reg2_r_sq)
-    print('Region 2 intercept', reg2_inter)
-    print('Region 2 slope', reg2_slope)
-
-    reg3 = log10_Oda.copy()
-    reg3.drop(reg3[reg3['regions'] != 2].index, inplace=True)
-    x_reg3 = reg3['Time (h)'].to_numpy()
-    x_reg3 = x_reg3.reshape((-1, 1))
-    y_reg3 = reg3['gDCWL-ln'].array
-
-    model.fit(x_reg3, y_reg3)
-    new_y_reg3 = model.predict(x_reg3)
-    ax.scatter(x_reg3, new_y_reg3, color='r', s=40, marker='.')
-    ax.set_yscale('log')
-    reg3_r_sq = model.score(x_reg3, y_reg3)
-    reg3_inter = model.intercept_
-    reg3_slope = model.coef_
-    print('Region 3 Rsq', reg3_r_sq)
-    print('Region 3 intercept', reg3_inter)
-    print('Region 3 slope', reg3_slope)
-
-    # Exponential model Region 2
-    x_reg1_exp = reg1['Time (h)']
-    y_reg1_exp = reg1['Time (h)']
-    popt_exponential_reg1, pcov_exponential_reg1 = curve_fit(exponential, x_reg1_exp, y_reg1_exp)
-    # we then can find the error of the fitting parameters
-    # from the pcov_linear array
-    perr_exponential_reg1 = np.sqrt(np.diag(pcov_exponential_reg1))
-    print(popt_exponential_reg1)
-    print("pre-exponential factor = %0.2f (+/-) %0.2f" % (popt_exponential_reg1[0], perr_exponential_reg1[0]))
-    print("rate constant = %0.2f (+/-) %0.2f" % (popt_exponential_reg1[1], perr_exponential_reg1[1]))
-
-    x_reg2_exp = reg2['Time (h)']
-    y_reg2_exp = reg2['gDCWL']
-    popt_exponential_reg2, pcov_exponential_reg2 = curve_fit(exponential, x_reg2_exp, y_reg2_exp)
-    perr_exponential_reg2 = np.sqrt(np.diag(pcov_exponential_reg2))
-    print(1/popt_exponential_reg2, 'popt')
-    print(perr_exponential_reg2, 'perr')
-    print(pcov_exponential_reg2, 'cov')
-    print("pre-exponential factor = %0.2f (+/-) %0.2f" % (popt_exponential_reg1[0], perr_exponential_reg1[0]))
-    print("rate constant = %0.2f (+/-) %0.2f" % (popt_exponential_reg2[1], perr_exponential_reg2[1]))
-
-    x_reg3_exp = reg3['Time (h)']
-    y_reg3_exp = reg3['gDCWL']
-    popt_exponential_reg3, pcov_exponential_reg3 = curve_fit(exponential, x_reg3_exp, y_reg3_exp)
-    perr_exponential_reg3 = np.sqrt(np.diag(pcov_exponential_reg3))
-    print(popt_exponential_reg3)
-    print("pre-exponential factor = %0.2f (+/-) %0.2f" % (popt_exponential_reg3[0], perr_exponential_reg3[0]))
-    print("rate constant = %0.2f (+/-) %0.2f" % (popt_exponential_reg3[1], perr_exponential_reg3[1]))
-    print(np.exp(1))
-    #log10_Oda.to_csv('final2.csv')
-    muMax = 0
-
-    return muMax
+    return muMax, log10_Oda
 
 
-def silh(df_gDCW_GR):
-    range_n_cluster = list(range(2, 10))
-    aux = []
-    # fig_kelbow = plt.figure('kelbow')
-    # axK = fig_kelbow.gca()
-    # kelbow_visualizer(KMeans(random_state=4), df_gDCW_GR[['Time (h)', 'gDCWL', 'mu']], k=(2, 10), ax=axK)
-    # mod = KEL
-    print()
+def growthPhases_mu(muMax, df_gDCW_final, name, paths):
+    df_gDCW_final = df_gDCW_final[1:]
+    df_gDCW_final = df_gDCW_final.fillna(0)
+    k_opt = k_optimal_inertia(df_gDCW_final)
+    k2_opt, vec = k_optimal_silhouetteCoffin(df_gDCW_final[['Time (h)', 'mu']], 4)
+    n_clusters = k2_opt[vec.index(np.max(vec))]
+    cluster_labels, cent, inert = Kmeans(df_gDCW_final[['Time (h)', 'mu', 'gDCWL']], n_clusters)
+    kmeans = pd.DataFrame(cluster_labels)
+    df_gDCW_final.insert((df_gDCW_final.shape[1]), 'GR-Phase', kmeans)
 
-    for n_clusters in range_n_cluster:
-        k_means = KMeans(n_clusters=n_clusters, random_state=10)
-        cluster_labels = k_means.fit_predict(df_gDCW_GR)
-        silhouette_avg = silhouette_score(df_gDCW_GR[['Time (h)', 'gDCWL', 'mu']], cluster_labels)
-        aux.append(silhouette_avg)
-    print(aux)
+    columns_names = list(df_gDCW_final.columns)
+    name = 'Growth Phases based on mu - ' + name
+    fig, ax = plt.subplots()
+    fig.canvas.set_window_title(name)
+    slash = r'/'
+    targets = np.arange(0, df_gDCW_final['GR-Phase'].max() + 1)
+    ax.set_xlabel('Time (h)')
+    colors = plt.cm.rainbow(np.linspace(0, 1, len(targets)))
+
+    t = df_gDCW_final['Time (h)']
+    bio = df_gDCW_final['gDCWL']
+
+    ax.set_xlabel('Time (h)')
+    ax.set_ylabel('Biomass (gdcw/L)')
+    ax.plot(t, bio, label= 'Biomass (gDCW ' + slash + ' L)')  # in case you want to change the plot color, add color=
+    # 'some color'
+    leg1 = ax.legend(loc='lower left', frameon=False, bbox_to_anchor=(0., 1.02, 1., .102), ncol=1, borderaxespad=0)
+    ax.tick_params(axis='y')
+    xticks_bio = ax.xaxis.get_major_ticks()
+    xticks_bio[0].label1.set_visible(False)
+
+    ax2_mu = ax.twinx()  # instantiate a second axes that shares the same x-axis
+    ax2_mu.set_ylabel('μ (1/h)')  # we already handled the x-label with ax1
+    leg = []
+    for target, colors in zip(targets, colors):
+        leg_name = 'Phase ' + str(int(target + 1))
+        leg.append(leg_name)
+        indicesToKeep = df_gDCW_final['GR-Phase'] == target
+        ax2_mu.scatter(df_gDCW_final.loc[indicesToKeep, 'Time (h)']
+                   , df_gDCW_final.loc[indicesToKeep, 'mu']
+                   , color=colors,
+                   marker='.', alpha=0.8)
+    #    ax.set_yscale("log", nonposy='clip')
+    ax2_mu.tick_params(axis='y')
+
+    fig.tight_layout()  # otherwise the right y-label is slightly clipped
+    ax.set_xlim(0.0, len(t))
+    ax2_mu.set_ylim(ymin=0)
+    plt.grid()
+    # ax.legend('Biomass (gDCW ' + slash + ' L)')
+    ax2_mu.legend(leg, loc='lower right', frameon=False, bbox_to_anchor=(0., 1.02, 1., .102), ncol=3, borderaxespad=0)
+    save_plot(name, paths, '.pdf')
 
 
 if __name__ == '__main__':
@@ -465,7 +527,7 @@ if __name__ == '__main__':
         if d == 'f':
             df_biomas = pd.read_csv(file_inBiomas)
             df_ODa_ODa = pd.read_csv(file_inODa)
-            print(df_ODa_ODa.keys())
+
             df_ODa = df_ODa_ODa[['Time (h)', 'Oda']]
             # To get the file name
             if file_inBiomas.find('\\') != -1:
@@ -478,7 +540,6 @@ if __name__ == '__main__':
                 name = name[-1]
                 name = name.split('.')
                 name = name[0]
-                print(name)
 
             columns_names_oda = list(df_ODa.columns)
             for index, row in df_ODa.iterrows():
@@ -497,14 +558,13 @@ if __name__ == '__main__':
             df_gDCW_L_mu = mu(df_gDCW_L, name, paths)  # Call the function to compute μ (1/h) by using ln(y2-y1)/t2-t1
             # and plot μ (1/h) vs time (h), and also biomass (gDCW/l) vs time
 
-            df_gDCW_muMax = mu_Max(df_gDCW_L_mu, name, paths)  # Call the function to compute mu (growth rate) based on
-            # in-direct biomass(df_gDW_L)
-
+            muMax, df_gDCW_final = mu_Max(df_gDCW_L_mu, name, paths)  # Call the function to compute mu (growth rate)
+            # based on in-direct biomass(df_gDW_L)
             # Finding Growth Phases
-
+            growthPhases_mu(muMax, df_gDCW_final, name, paths)
             # silh(df_gDCW_GR)
 
-            plt.show()
+            # plt.show()
 
         else:
             print('I do not know what you want, push (d) for loading multiple file or (f) for loding just one file :D')
