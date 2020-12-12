@@ -497,6 +497,8 @@ def growthPhases_mu(muMax, df_gDCW_final, name, paths):
     # ax.legend('Biomass (gDCW ' + slash + ' L)')
     ax2_mu.legend(leg, loc='lower right', frameon=False, bbox_to_anchor=(0., 1.02, 1., .102), ncol=3, borderaxespad=0)
     save_plot(name, paths, '.pdf')
+    name = paths + '\\' + name.replace(' ', '') + '.csv'
+    df_gDCW_final.to_csv(name)
 
 
 if __name__ == '__main__':
