@@ -74,11 +74,10 @@ def plotBIOMAS_ODA_vsTime(df_biomas, df_oda, name, paths):
     xticks[0].label1.set_visible(False)
     # plt.grid()
     save_plot(name_bio, paths, '.pdf')
-
     name_oda = 'ODa Vs Time - ' + name
     fig_oda = plt.figure(name_oda)
     ax_oda = fig_oda.gca()
-    df_oda.plot(kind='scatter', x=columns_names_oda[0], y=columns_names_oda[1], ax=ax_oda)
+    # df_oda.plot(kind='scatter', x=columns_names_oda[0], y=columns_names_oda[1], ax=ax_oda)
     df_oda.plot(kind='line', x=columns_names_oda[0], y=columns_names_oda[1], ax=ax_oda)
     plt.axis([0, df_oda[columns_names_oda[0]].max() + 5, 0, df_oda[columns_names_oda[1]].max() + 5])
     ax_oda.legend_ = None
@@ -93,15 +92,10 @@ def lineal(x, a, b):
     return a * x + b
 
 
-def exponential(x, a, k, b):
-    """This function fits a set of points to an Exp model (y = b / 1+ a*exp(-x*K)"""
-    return b / (1 + a * np.exp(-x * k))
-
-
-def exponential2(x, a, b):
+def exponential(x, a, k):
     """This function fits a set of points to an Exp model (y = a*Exp(bx)"""
-    y = a*np.exp(x*b)
-    return y
+    return a * np.exp(x * k)
+
 
 def biomassVSoda(df_biomas, df_oda, name, paths):
     """ This function is responsible for calculating in-direct biomass based on ODa measurement, i.e., gDCWL = a ODa
@@ -151,7 +145,6 @@ def biomassVSoda(df_biomas, df_oda, name, paths):
     plt.ylabel('Biomass')
     # plt.grid()
 
-
     save_plot(name_bioVSoda, paths, '.pdf')
 
     return a, b
@@ -187,7 +180,6 @@ def biomass_gDCW_L(df_ODa, m, b, name, paths):
     xticks_ODa_biomass_GDW[0].label1.set_visible(False)
     slash = r'/'
     plt.ylabel('Biomass (gDCW ' + slash + ' L)')
-    # plt.grid()
     save_plot(name_ODa_biomass_GDW, paths, '.pdf')
 
     return df_ODa_biomass_GDW
@@ -293,7 +285,6 @@ def mu_Max(df_gDCW_mu, name, paths):
         a = row.at['gDCWL']
         if a != 0:
             log10_Oda.at[index, 'gDCWL-ln'] = np.abs(ln(a))
-
         else:
             continue
     log10_Oda = log10_Oda.fillna(0)
@@ -312,7 +303,6 @@ def mu_Max(df_gDCW_mu, name, paths):
     xticks_[0].label1.set_visible(False)
     slash = r'/'
     plt.ylabel('Biomass (gDCW ' + slash + ' L)')
-    # plt.grid()
     save_plot(name, paths, '.pdf')
 
     n_clusters = 3
@@ -342,14 +332,14 @@ def mu_Max(df_gDCW_mu, name, paths):
         targets[i] = targets[i] + 1
     ax.legend(leg)
 
+    # Lineal Model
+    model = LinearRegression()
+
     reg1 = log10_Oda.copy()
-    reg1.drop(reg1[reg1['regions'] != 0].index, inplace=True)
+    reg1.drop(reg1[reg1['regions'] != 0].index, inplace=True)  # Sub-select the rows belonging to the region 1 only
     y = reg1['gDCWL-ln'].array
-    y_exp = reg1['gDCWL-ln']
     x = reg1['Time (h)'].to_numpy()
     x = x.reshape((-1, 1))
-    x_exp = reg1['Time (h)']
-    model = LinearRegression()
     model.fit(x, y)
     new_y_reg1 = model.predict(x)
     ax.scatter(x, new_y_reg1, color='r', s=40, marker='.')
@@ -362,16 +352,14 @@ def mu_Max(df_gDCW_mu, name, paths):
     print('Region 1 slope', reg1_slope)
 
     reg2 = log10_Oda.copy()
-    reg2.drop(reg2[reg2['regions'] != 1].index, inplace=True)
+    reg2.drop(reg2[reg2['regions'] != 1].index, inplace=True)  # Sub-select the rows belonging to the region 2 only
+
     x_reg2 = reg2['Time (h)'].to_numpy()
-    x_reg2_exp = reg2['Time (h)']
     x_reg2 = x_reg2.reshape((-1, 1))
     y_reg2 = reg2['gDCWL-ln'].array
-    y_reg2_exp = reg2['gDCWL-ln']
-    model = LinearRegression()
-    model.fit(x_reg2, y_reg2)
 
-    reg2_r_sq = model.score(x_reg2,y_reg2)
+    model.fit(x_reg2, y_reg2)
+    reg2_r_sq = model.score(x_reg2, y_reg2)
     reg2_inter = model.intercept_
     reg2_slope = model.coef_
     new_y_reg2 = model.predict(x_reg2)
@@ -383,11 +371,9 @@ def mu_Max(df_gDCW_mu, name, paths):
     reg3 = log10_Oda.copy()
     reg3.drop(reg3[reg3['regions'] != 2].index, inplace=True)
     x_reg3 = reg3['Time (h)'].to_numpy()
-    x_reg3_exp = reg3['Time (h)']
     x_reg3 = x_reg3.reshape((-1, 1))
     y_reg3 = reg3['gDCWL-ln'].array
-    y_reg3_exp = reg3['gDCWL-ln']
-    model = LinearRegression()
+
     model.fit(x_reg3, y_reg3)
     new_y_reg3 = model.predict(x_reg3)
     ax.scatter(x_reg3, new_y_reg3, color='r', s=40, marker='.')
@@ -399,30 +385,36 @@ def mu_Max(df_gDCW_mu, name, paths):
     print('Region 3 intercept', reg3_inter)
     print('Region 3 slope', reg3_slope)
 
-    popt1, pcov = curve_fit(exponential2, x_exp, y_exp)
-    a1, b1 =popt1
+    # Exponential model Region 2
+    x_reg1_exp = reg1['Time (h)']
+    y_reg1_exp = reg1['Time (h)']
+    popt_exponential_reg1, pcov_exponential_reg1 = curve_fit(exponential, x_reg1_exp, y_reg1_exp)
+    # we then can find the error of the fitting parameters
+    # from the pcov_linear array
+    perr_exponential_reg1 = np.sqrt(np.diag(pcov_exponential_reg1))
+    print(popt_exponential_reg1)
+    print("pre-exponential factor = %0.2f (+/-) %0.2f" % (popt_exponential_reg1[0], perr_exponential_reg1[0]))
+    print("rate constant = %0.2f (+/-) %0.2f" % (popt_exponential_reg1[1], perr_exponential_reg1[1]))
 
-    popt2, pcov2 = curve_fit(exponential2, x_reg2_exp, y_reg2_exp)
-    print(popt2)
-    a2, b2 = popt2
+    x_reg2_exp = reg2['Time (h)']
+    y_reg2_exp = reg2['gDCWL']
+    popt_exponential_reg2, pcov_exponential_reg2 = curve_fit(exponential, x_reg2_exp, y_reg2_exp)
+    perr_exponential_reg2 = np.sqrt(np.diag(pcov_exponential_reg2))
+    print(1/popt_exponential_reg2, 'popt')
+    print(perr_exponential_reg2, 'perr')
+    print(pcov_exponential_reg2, 'cov')
+    print("pre-exponential factor = %0.2f (+/-) %0.2f" % (popt_exponential_reg1[0], perr_exponential_reg1[0]))
+    print("rate constant = %0.2f (+/-) %0.2f" % (popt_exponential_reg2[1], perr_exponential_reg2[1]))
 
-    popt3, pcov3 = curve_fit(exponential2, x_reg3_exp, y_reg3_exp)
-    a3, b3 = popt3
-
-    fig2 = plt.figure('Exp fit')
-    ax2 = fig2.gca()
-    ax2.plot(x_exp, y_exp, color='coral')
-    ax2.plot(x_reg2_exp, y_reg2_exp, color='g')
-    ax2.plot(x_reg3_exp, y_reg3_exp, color='y')
-    ax2.scatter(log10_Oda['Time (h)'], log10_Oda['gDCWL'], color='r', s=40, marker='.')
-    ax2.set_yscale("log", nonposy='clip')
-
-    print('Reg 1:', a1, b1)
-    print('Reg 2:', a2, b2)
-    print('Reg 3:', a3, b3)
-    # plt.plot(x_exp, exponential2(x_exp, a, b), 'r-')
-    #save_plot(name, paths, '.pdf')
-    log10_Oda.to_csv('final2.csv')
+    x_reg3_exp = reg3['Time (h)']
+    y_reg3_exp = reg3['gDCWL']
+    popt_exponential_reg3, pcov_exponential_reg3 = curve_fit(exponential, x_reg3_exp, y_reg3_exp)
+    perr_exponential_reg3 = np.sqrt(np.diag(pcov_exponential_reg3))
+    print(popt_exponential_reg3)
+    print("pre-exponential factor = %0.2f (+/-) %0.2f" % (popt_exponential_reg3[0], perr_exponential_reg3[0]))
+    print("rate constant = %0.2f (+/-) %0.2f" % (popt_exponential_reg3[1], perr_exponential_reg3[1]))
+    print(np.exp(1))
+    #log10_Oda.to_csv('final2.csv')
     muMax = 0
 
     return muMax
