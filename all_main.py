@@ -12,8 +12,6 @@ from scipy.optimize import curve_fit
 from sklearn.linear_model import LinearRegression
 from matplotlib.axes._axes import _log as matplotlib_axes_logger
 from sklearn.metrics import silhouette_samples, silhouette_score
-from sklearn.preprocessing import StandardScaler  # For scaling dataset
-from yellowbrick.cluster import kelbow_visualizer, KElbowVisualizer
 
 matplotlib_axes_logger.setLevel('ERROR')
 warnings.filterwarnings('ignore')
@@ -30,9 +28,7 @@ plt.rcParams.update({'font.size': 10})
 def get_h(time_str):
     """This function is to convert the time format to integers, more specifically hours to integers"""
     a = time_str.count(':')
-    # print(a)
     if a < 2:
-        # print(time_str)
         h, m = time_str.split(':')
         sec = int(h) * 3600 + int(m) * 60
         return sec / 3600
@@ -47,6 +43,9 @@ def save_plot(name, paths, format_fig):
         name = paths + '\\' + name.replace(' ', '') + format_fig
     else:
         name = paths + '\\' + name + format_fig
+
+    print('Plot saved in: ', name)
+    plt.grid()
     plt.savefig(name)
 
 
@@ -57,6 +56,8 @@ def plotBIOMAS_ODA_vsTime(df_biomas, df_oda, name, paths):
     :param name: This variable contains ID name, which will the ID of the plot generated
     :param df_oda: main DataFrame of the biomass values based in absorbance from the online probe
     :type df_biomas: main DataFrame of the direct biomass measurement"""
+
+    print('\n*** Plotting and saving the directly Biomass vs Time  *** ')
 
     columns_names = list(df_biomas.columns)
     columns_names_oda = list(df_oda.columns)
@@ -72,6 +73,7 @@ def plotBIOMAS_ODA_vsTime(df_biomas, df_oda, name, paths):
     xticks[0].label1.set_visible(False)
     # plt.grid()
     save_plot(name_bio, paths, '.pdf')
+    print('\n*** Plotting ans saving biomass values based in absorbance from the online probe (ODa) vs Time  *** ')
     name_oda = 'ODa Vs Time - ' + name
     fig_oda = plt.figure(name_oda)
     ax_oda = fig_oda.gca()
@@ -119,7 +121,7 @@ def biomassVSoda(df_biomas, df_oda, name, paths):
     y = df_biomas_oda[columns_names_bio[1]]
     poppet, _ = curve_fit(lineal, x, y)
     a, b = poppet  # Coefficients of y = a x + b
-    print('*** Calibration of ODa x measured biomass (X) *** \n', '\n y = %.5f * x + %.5f' % (a, b), '\n')
+    print('\n*** Calibration of ODa x measured biomass (X) *** \n', '\n y = %.5f * x + %.5f' % (a, b), '\n')
     # define a sequence of inputs between the smallest and largest known inputs
     finalDF = pd.DataFrame({'x_line': [], 'y_line': [], 'x': [], 'y': []})
     finalDF['x_line'] = np.arange(min(x), max(x), 1)
@@ -141,7 +143,6 @@ def biomassVSoda(df_biomas, df_oda, name, paths):
     xticks[0].label1.set_visible(False)
     plt.xlabel('ODa')
     plt.ylabel('Biomass')
-
     save_plot(name_bioVSoda, paths, '.pdf')
 
     return a, b
@@ -154,7 +155,7 @@ def biomass_gDCW_L(df_ODa, m, b, name, paths):
     :param df_ODa: DataFrame of the biomass values based in absorbance from the online probe
     :param paths: This is the paths in which all the files generated will be saved
     :param name: This variable contains ID name, which will the ID of the plot generated """
-
+    print('\n*** Computing in-direct biomass based on ODa (gDCWL = x ODa + b) *** \n')
     df_ODa_biomass_GDW = df_ODa.copy()
     df_ODa_biomass_GDW['gDCWL'] = 0.0  # create a new columns named gDCWL to store the in direct biomass, i.e.,
     # biomass based on ODa
@@ -188,6 +189,7 @@ def mu(df_gDCW, name, paths):
          :param name: This variable contains ID name, which will the ID of the plot generated
          :param paths: This is the paths in which all the files generated will be saved """
 
+    print('\n*** Computing mu *** \n')
     df_gDCW_mu = df_gDCW.copy()
     df_gDCW_mu['mu'] = 0.0
     i = 0
@@ -218,7 +220,7 @@ def mu(df_gDCW, name, paths):
 
     ax2_mu = ax1_bio.twinx()  # instantiate a second axes that shares the same x-axis
     ax2_mu.set_ylabel('μ (1/h)')  # we already handled the x-label with ax1
-    ax2_mu.scatter(t, mu, color='peru', s=15)
+    ax2_mu.scatter(t, abs(mu), color='peru', s=15)
     ax2_mu.tick_params(axis='y')
     fig_bio.tight_layout()  # otherwise the right y-label is slightly clipped
 
@@ -226,7 +228,6 @@ def mu(df_gDCW, name, paths):
     ax1_bio.set_ylim(ymin=0)
     ax2_mu.set_ylim(ymin=0)
     plt.grid()
-
     save_plot(name_mu, paths, '.pdf')
 
     # plot all without outlier
@@ -246,10 +247,11 @@ def mu(df_gDCW, name, paths):
 
     ax2_mu = ax1_bio.twinx()  # instantiate a second axes that shares the same x-axis
     ax2_mu.set_ylabel('μ (1/h)')  # we already handled the x-label with ax1
-    ax2_mu.scatter(t[2:], mu[2:], color='peru', s=15)
+    ax2_mu.scatter(t[2:], abs(mu[2:]), color='peru', s=15)
     ax2_mu.tick_params(axis='y')
     fig_bio.tight_layout()  # otherwise the right y-label is slightly clipped
     ax1_bio.set_xlim(0.0, len(t))
+    ax1_bio.set_ylim(ymin=0)
     ax2_mu.set_ylim(ymin=0)
     plt.grid()
     save_plot(name_mu, paths, '.pdf')
@@ -289,7 +291,7 @@ def k_optimal_inertia(x):
 def R_sq_optimiser(df, R_sq_old):
     global a, r_df, n_df, inter, slope
     model = LinearRegression()
-    ind=0
+    ind = 0
     for i in range(1, len(df)):
         n_df = df.copy()
         n_df = n_df[i:]
@@ -332,7 +334,8 @@ def mu_Max(df_gDCW_mu, name, paths):
      :param df_gDCW_mu: Main DataFrame which should contain the following columns: Time (h), Oda, gDCWL, and mu
      :param name: This variable contains ID name, which will the ID of the plot generated
      :param paths: This is the paths in which all the files generated will be saved """
-    # print(df_gDCW_mu.keys())
+
+    print('\n*** Computing mu_Max *** \n')
 
     log10_Oda = df_gDCW_mu.copy()
     log10_Oda['gDCWL-ln'] = 0.0
@@ -359,7 +362,8 @@ def mu_Max(df_gDCW_mu, name, paths):
     xticks_[0].label1.set_visible(False)
     slash = r'/'
     plt.ylabel('Biomass (gDCW ' + slash + ' L) (log_10)')
-    save_plot(name, paths, '.pdf')
+    plt.grid()
+    print('Computing and saving Log_10 Biomass (gDCW\L)')
 
     range_n_clusters, opt_k = k_optimal_silhouetteCoffin(log10_Oda[['Time (h)', 'gDCWL']], 2)
     n_clusters = range_n_clusters[opt_k.index(np.max(opt_k))]
@@ -385,6 +389,7 @@ def mu_Max(df_gDCW_mu, name, paths):
         ax.set_yscale("log", nonposy='clip')
 
     ax.legend(leg)
+
     save_plot(name, paths, '.pdf')
     # Lineal Model
     model = LinearRegression()
@@ -408,28 +413,33 @@ def mu_Max(df_gDCW_mu, name, paths):
     R_sq_final = R_sq[region]
     bestRegion = log10_Oda.copy()
     bestRegion.drop(bestRegion[bestRegion['regions'] != region].index, inplace=True)
-    inter_final = inter[region]
-    slope_final = slope[region]
+
     R_sq_opt, slope_opt, inter_opt, df_final = R_sq_optimiser(bestRegion, R_sq_final)
     # print(R_sq_opt, slope_opt, inter_opt, df_final)
     # print(R_sq, slope, inter)
     # print(region, R_sq_final, slope_final, inter_final)
-
+    print('\n*** Finding optimal mu_Max *** \n', '\n y = %.5f * x + %.5f' % (slope_opt, inter_opt), '\n')
+    print('mu_Max: ', slope_opt)
+    print('\nR-squared: ', R_sq_opt, '\n')
     columns_names = list(log10_Oda.columns)
     name = 'mu_Max' + name
     fig_muMax = plt.figure(name)
     ax_muMax = fig_muMax.gca()
-    bestRegion.plot(kind='line', x=columns_names[0], y=columns_names[2], ax=ax_muMax, label= 'Biomass')
-    df_final.plot(kind='scatter', x=columns_names[0], y=columns_names[2], ax=ax_muMax, marker = '.', label='y = %.5f '
-                                                                                                           '* x + '
-                                                                                                           '%.5f '
-                                                                                                           '\n\nR'
-                                                                                                           '-squared '
-                                                                                                           '= %.5f '
-                                                                                                           '\n'
-                                                                                                           '\nmu_Max '
-                                                                                                           '= %.5f '
-                                                                                                           % (slope_opt, inter_opt, R_sq_opt, slope_opt), color='red', s=40)
+    bestRegion.plot(kind='line', x=columns_names[0], y=columns_names[2], ax=ax_muMax, label='Biomass')
+    df_final.plot(kind='scatter', x=columns_names[0], y=columns_names[2], ax=ax_muMax, marker='.', label='y = %.5f '
+                                                                                                         '* x + '
+                                                                                                         '%.5f '
+                                                                                                         '\n\nR'
+                                                                                                         '-squared '
+                                                                                                         '= %.5f '
+                                                                                                         '\n'
+                                                                                                         '\nmu_Max '
+                                                                                                         '= %.5f '
+                                                                                                         % (slope_opt,
+                                                                                                            inter_opt,
+                                                                                                            R_sq_opt,
+                                                                                                            slope_opt),
+                  color='red', s=40)
     ax_muMax.set_yscale("log", nonposy='clip')
     ax_muMax.set_xlabel('Time (H)')
     ax_muMax.set_ylabel('Biomass (gdcw/L) (log_10)')
@@ -437,8 +447,10 @@ def mu_Max(df_gDCW_mu, name, paths):
               bestRegion[columns_names[2]].max() + 5])
     xticks_ = ax_muMax.xaxis.get_major_ticks()
     xticks_[0].label1.set_visible(False)
+
     save_plot(name, paths, '.pdf')
     name = paths + '\\' + name.replace(' ', '') + '.csv'
+    print('saving data in csv format: ', name)
     log10_Oda.to_csv(name)
     muMax = slope_opt
 
@@ -446,6 +458,7 @@ def mu_Max(df_gDCW_mu, name, paths):
 
 
 def growthPhases_mu(muMax, df_gDCW_final, name, paths):
+    print('\n*** Computing growth phases *** \n')
     df_gDCW_final = df_gDCW_final[1:]
     df_gDCW_final = df_gDCW_final.fillna(0)
     k_opt = k_optimal_inertia(df_gDCW_final)
@@ -469,7 +482,7 @@ def growthPhases_mu(muMax, df_gDCW_final, name, paths):
 
     ax.set_xlabel('Time (h)')
     ax.set_ylabel('Biomass (gdcw/L)')
-    ax.plot(t, bio, label= 'Biomass (gDCW ' + slash + ' L)')  # in case you want to change the plot color, add color=
+    ax.plot(t, bio, label='Biomass (gDCW ' + slash + ' L)')  # in case you want to change the plot color, add color=
     # 'some color'
     leg1 = ax.legend(loc='lower left', frameon=False, bbox_to_anchor=(0., 1.02, 1., .102), ncol=1, borderaxespad=0)
     ax.tick_params(axis='y')
@@ -480,24 +493,26 @@ def growthPhases_mu(muMax, df_gDCW_final, name, paths):
     ax2_mu.set_ylabel('μ (1/h)')  # we already handled the x-label with ax1
     leg = []
     for target, colors in zip(targets, colors):
-        leg_name = 'Phase ' + str(int(target + 1))
-        leg.append(leg_name)
+        # leg_name = 'Phase ' + str(int(target + 1))
+        # leg.append(leg_name)
         indicesToKeep = df_gDCW_final['GR-Phase'] == target
         ax2_mu.scatter(df_gDCW_final.loc[indicesToKeep, 'Time (h)']
-                   , df_gDCW_final.loc[indicesToKeep, 'mu']
-                   , color=colors,
-                   marker='.', alpha=0.8)
+                       , df_gDCW_final.loc[indicesToKeep, 'mu']
+                       , color=colors,
+                       marker='.', alpha=0.8)
     #    ax.set_yscale("log", nonposy='clip')
     ax2_mu.tick_params(axis='y')
 
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
     ax.set_xlim(0.0, len(t))
     ax2_mu.set_ylim(ymin=0)
-    plt.grid()
+
     # ax.legend('Biomass (gDCW ' + slash + ' L)')
-    ax2_mu.legend(leg, loc='lower right', frameon=False, bbox_to_anchor=(0., 1.02, 1., .102), ncol=3, borderaxespad=0)
+    # ax2_mu.legend(leg, loc='lower right', frameon=False, bbox_to_anchor=(0., 1.02, 1., .102), ncol=3, borderaxespad=0)
+    plt.grid()
     save_plot(name, paths, '.pdf')
     name = paths + '\\' + name.replace(' ', '') + '.csv'
+    print('saving final data in csv format : ', name)
     df_gDCW_final.to_csv(name)
 
 
@@ -509,24 +524,67 @@ if __name__ == '__main__':
     @click.command()
     @click.option('-bio', '--Bio', 'file_inBiomas', help='Path for getting the data of Biomas')
     @click.option('-ODa', '--ODa', 'file_inODa', help='Path for getting the data of ODa')
-    @click.option('-d', '-- One file or directory', 'd', help='push (d) for loading multiple file or (f) for loding '
-                                                              'just one file :D')
+    @click.option('-d', '-- One file or directory', 'd', help='write (dir) for loading multiple files or (f) for '
+                                                              'loading just one file :D')
     @click.option('-o', '--out', 'file_out', help='Name of the file in which data will be stored')
     def main(file_inBiomas, file_inODa, d, file_out):
-        print('*** Reading Data ***')
+        print('\n*** Reading Data ***')
         paths = str(pathlib.Path().absolute()) + '\\' + file_out
 
         if not os.path.exists(paths):
             os.mkdir(file_out)
 
-        if d == 'd':
+        if d == 'dir':
             dataPath_bio = gl.glob(file_inBiomas)
             dataPath_ODa = gl.glob(file_inODa)
+
             for i in range(0, len(dataPath_bio)):
                 df_biomas = pd.read_csv(dataPath_bio[i])
-                df_ODa = pd.read_csv(dataPath_ODa[i])
+                df_ODa_ODa = pd.read_csv(dataPath_ODa[i])
 
-        if d == 'f':
+                name = dataPath_bio[i].split('\\')
+                name_bio = name[-1].split('.')[0]
+
+                name = dataPath_ODa[i].split('\\')
+                name_ODa = name[-1].split('.')[0]
+                name_ODa_name = name_ODa.split('_ODa')[0]
+
+                if name_ODa_name == name_bio:
+                    paths_f = paths + '\\' + name_bio
+
+                    if not os.path.exists(paths_f):
+                        os.mkdir(file_out + '\\' + name_bio)
+
+                    df_ODa = df_ODa_ODa[['Time (h)', 'Oda']]
+
+                    columns_names_oda = list(df_ODa.columns)
+                    for index, row in df_ODa.iterrows():
+                        if type(row[columns_names_oda[0]]) == str:
+                            t = row.at[columns_names_oda[0]]
+                            tt = get_h(t)
+                            df_ODa.at[index, columns_names_oda[0]] = tt
+
+                    plotBIOMAS_ODA_vsTime(df_biomas, df_ODa, name_bio,
+                                          paths_f)  # Call the function to plot direct biomass vs time,
+                    # and also the in-direct biomass vs time
+
+                    m, b = biomassVSoda(df_biomas, df_ODa, name_bio,
+                                        paths_f)  # m and b are the coefficients of y = mX + b, that
+                    # are necessaries to convert ODa into biomass (g/L)
+
+                    df_gDCW_L = biomass_gDCW_L(df_ODa, m, b, name_bio,
+                                               paths_f)  # Call the function to convert ODa into biomass
+                    df_gDCW_L_mu = mu(df_gDCW_L, name_bio,
+                                      paths_f)  # Call the function to compute μ (1/h) by using ln(y2-y1)/t2-t1
+                    # and plot μ (1/h) vs time (h), and also biomass (gDCW/l) vs time
+
+                    muMax, df_gDCW_final = mu_Max(df_gDCW_L_mu, name_bio,
+                                                  paths_f)  # Call the function to compute mu (growth rate)
+                    # based on in-direct biomass(df_gDW_L)
+                    # Finding Growth Phases
+                    growthPhases_mu(muMax, df_gDCW_final, name_bio, paths_f)
+
+        elif d == 'f':
             df_biomas = pd.read_csv(file_inBiomas)
             df_ODa_ODa = pd.read_csv(file_inODa)
 
@@ -569,5 +627,5 @@ if __name__ == '__main__':
             # plt.show()
 
         else:
-            print('I do not know what you want, push (d) for loading multiple file or (f) for loding just one file :D')
+            print('Push (d) for loading multiple file or (f) for loding just one file :D')
 main()

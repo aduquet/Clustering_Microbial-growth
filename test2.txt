@@ -1,0 +1,254 @@
+
+*** Reading Data ***
+
+*** Plotting and saving the directly Biomass vs Time  *** 
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F285_R1\BiomassVsTime-F285_R1.pdf
+
+*** Plotting ans saving biomass values based in absorbance from the online probe (ODa) vs Time  *** 
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F285_R1\ODaVsTime-F285_R1.pdf
+
+*** Calibration of ODa x measured biomass (X) *** 
+ 
+ y = 0.01698 * x + 0.25396 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F285_R1\BiomassVsODa-F285_R1.pdf
+
+*** Computing in-direct biomass based on ODa (gDCWL = x ODa + b) *** 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F285_R1\BiomassgDCWLVsTime-F285_R1.pdf
+
+*** Computing mu *** 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F285_R1\gDCW_muvsTime(Alldata)-F285_R1.pdf
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F285_R1\gDCW_muvsTime-F285_R1.pdf
+
+*** Computing mu_Max *** 
+
+Computing and saving Log_10 Biomass (gDCW\L)
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F285_R1\BiomassgDCW_LVsTime(log10)-F285_R1.pdf
+
+*** Finding optimal mu_Max *** 
+ 
+ y = 0.04965 * x + -0.44646 
+
+mu_Max:  [0.04964852]
+
+R-squared:  0.9974842692962573 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F285_R1\mu_MaxBiomassgDCW_LVsTime(log10)-F285_R1.pdf
+saving data in csv format:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F285_R1\mu_MaxBiomassgDCW_LVsTime(log10)-F285_R1.csv
+
+*** Computing growth phases *** 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F285_R1\GrowthPhasesbasedonmu-F285_R1.pdf
+saving final data in csv format :  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F285_R1\GrowthPhasesbasedonmu-F285_R1.csv
+
+*** Plotting and saving the directly Biomass vs Time  *** 
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F286_R2\BiomassVsTime-F286_R2.pdf
+
+*** Plotting ans saving biomass values based in absorbance from the online probe (ODa) vs Time  *** 
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F286_R2\ODaVsTime-F286_R2.pdf
+
+*** Calibration of ODa x measured biomass (X) *** 
+ 
+ y = 0.01903 * x + 0.15428 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F286_R2\BiomassVsODa-F286_R2.pdf
+
+*** Computing in-direct biomass based on ODa (gDCWL = x ODa + b) *** 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F286_R2\BiomassgDCWLVsTime-F286_R2.pdf
+
+*** Computing mu *** 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F286_R2\gDCW_muvsTime(Alldata)-F286_R2.pdf
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F286_R2\gDCW_muvsTime-F286_R2.pdf
+
+*** Computing mu_Max *** 
+
+Computing and saving Log_10 Biomass (gDCW\L)
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F286_R2\BiomassgDCW_LVsTime(log10)-F286_R2.pdf
+
+*** Finding optimal mu_Max *** 
+ 
+ y = 0.05123 * x + -0.46763 
+
+mu_Max:  [0.05122584]
+
+R-squared:  0.9957966108543869 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F286_R2\mu_MaxBiomassgDCW_LVsTime(log10)-F286_R2.pdf
+saving data in csv format:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F286_R2\mu_MaxBiomassgDCW_LVsTime(log10)-F286_R2.csv
+
+*** Computing growth phases *** 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F286_R2\GrowthPhasesbasedonmu-F286_R2.pdf
+saving final data in csv format :  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F286_R2\GrowthPhasesbasedonmu-F286_R2.csv
+
+*** Plotting and saving the directly Biomass vs Time  *** 
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F287_R3\BiomassVsTime-F287_R3.pdf
+
+*** Plotting ans saving biomass values based in absorbance from the online probe (ODa) vs Time  *** 
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F287_R3\ODaVsTime-F287_R3.pdf
+
+*** Calibration of ODa x measured biomass (X) *** 
+ 
+ y = 0.03134 * x + -0.56244 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F287_R3\BiomassVsODa-F287_R3.pdf
+
+*** Computing in-direct biomass based on ODa (gDCWL = x ODa + b) *** 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F287_R3\BiomassgDCWLVsTime-F287_R3.pdf
+
+*** Computing mu *** 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F287_R3\gDCW_muvsTime(Alldata)-F287_R3.pdf
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F287_R3\gDCW_muvsTime-F287_R3.pdf
+
+*** Computing mu_Max *** 
+
+Computing and saving Log_10 Biomass (gDCW\L)
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F287_R3\BiomassgDCW_LVsTime(log10)-F287_R3.pdf
+
+*** Finding optimal mu_Max *** 
+ 
+ y = 0.05123 * x + -0.46763 
+
+mu_Max:  [0.05122584]
+
+R-squared:  0.9957966108543869 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F287_R3\mu_MaxBiomassgDCW_LVsTime(log10)-F287_R3.pdf
+saving data in csv format:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F287_R3\mu_MaxBiomassgDCW_LVsTime(log10)-F287_R3.csv
+
+*** Computing growth phases *** 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F287_R3\GrowthPhasesbasedonmu-F287_R3.pdf
+saving final data in csv format :  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F287_R3\GrowthPhasesbasedonmu-F287_R3.csv
+
+*** Plotting and saving the directly Biomass vs Time  *** 
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F299_R1\BiomassVsTime-F299_R1.pdf
+
+*** Plotting ans saving biomass values based in absorbance from the online probe (ODa) vs Time  *** 
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F299_R1\ODaVsTime-F299_R1.pdf
+
+*** Calibration of ODa x measured biomass (X) *** 
+ 
+ y = 0.01200 * x + 3.76356 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F299_R1\BiomassVsODa-F299_R1.pdf
+
+*** Computing in-direct biomass based on ODa (gDCWL = x ODa + b) *** 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F299_R1\BiomassgDCWLVsTime-F299_R1.pdf
+
+*** Computing mu *** 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F299_R1\gDCW_muvsTime(Alldata)-F299_R1.pdf
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F299_R1\gDCW_muvsTime-F299_R1.pdf
+
+*** Computing mu_Max *** 
+
+Computing and saving Log_10 Biomass (gDCW\L)
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F299_R1\BiomassgDCW_LVsTime(log10)-F299_R1.pdf
+
+*** Finding optimal mu_Max *** 
+ 
+ y = 0.00676 * x + 1.47476 
+
+mu_Max:  [0.00676023]
+
+R-squared:  0.9931826744978677 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F299_R1\mu_MaxBiomassgDCW_LVsTime(log10)-F299_R1.pdf
+saving data in csv format:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F299_R1\mu_MaxBiomassgDCW_LVsTime(log10)-F299_R1.csv
+
+*** Computing growth phases *** 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F299_R1\GrowthPhasesbasedonmu-F299_R1.pdf
+saving final data in csv format :  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F299_R1\GrowthPhasesbasedonmu-F299_R1.csv
+
+*** Plotting and saving the directly Biomass vs Time  *** 
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F301_R3\BiomassVsTime-F301_R3.pdf
+
+*** Plotting ans saving biomass values based in absorbance from the online probe (ODa) vs Time  *** 
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F301_R3\ODaVsTime-F301_R3.pdf
+
+*** Calibration of ODa x measured biomass (X) *** 
+ 
+ y = 0.03194 * x + 0.79777 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F301_R3\BiomassVsODa-F301_R3.pdf
+
+*** Computing in-direct biomass based on ODa (gDCWL = x ODa + b) *** 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F301_R3\BiomassgDCWLVsTime-F301_R3.pdf
+
+*** Computing mu *** 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F301_R3\gDCW_muvsTime(Alldata)-F301_R3.pdf
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F301_R3\gDCW_muvsTime-F301_R3.pdf
+
+*** Computing mu_Max *** 
+
+Computing and saving Log_10 Biomass (gDCW\L)
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F301_R3\BiomassgDCW_LVsTime(log10)-F301_R3.pdf
+
+*** Finding optimal mu_Max *** 
+ 
+ y = 0.00676 * x + 1.47476 
+
+mu_Max:  [0.00676023]
+
+R-squared:  0.9931826744978677 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F301_R3\mu_MaxBiomassgDCW_LVsTime(log10)-F301_R3.pdf
+saving data in csv format:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F301_R3\mu_MaxBiomassgDCW_LVsTime(log10)-F301_R3.csv
+
+*** Computing growth phases *** 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F301_R3\GrowthPhasesbasedonmu-F301_R3.pdf
+saving final data in csv format :  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F301_R3\GrowthPhasesbasedonmu-F301_R3.csv
+
+*** Plotting and saving the directly Biomass vs Time  *** 
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F304_R1\BiomassVsTime-F304_R1.pdf
+
+*** Plotting ans saving biomass values based in absorbance from the online probe (ODa) vs Time  *** 
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F304_R1\ODaVsTime-F304_R1.pdf
+
+*** Calibration of ODa x measured biomass (X) *** 
+ 
+ y = 0.01744 * x + 4.85572 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F304_R1\BiomassVsODa-F304_R1.pdf
+
+*** Computing in-direct biomass based on ODa (gDCWL = x ODa + b) *** 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F304_R1\BiomassgDCWLVsTime-F304_R1.pdf
+
+*** Computing mu *** 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F304_R1\gDCW_muvsTime(Alldata)-F304_R1.pdf
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F304_R1\gDCW_muvsTime-F304_R1.pdf
+
+*** Computing mu_Max *** 
+
+Computing and saving Log_10 Biomass (gDCW\L)
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F304_R1\BiomassgDCW_LVsTime(log10)-F304_R1.pdf
+
+*** Finding optimal mu_Max *** 
+ 
+ y = 0.00627 * x + 1.68943 
+
+mu_Max:  [0.00626903]
+
+R-squared:  0.9903962838233492 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F304_R1\mu_MaxBiomassgDCW_LVsTime(log10)-F304_R1.pdf
+saving data in csv format:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F304_R1\mu_MaxBiomassgDCW_LVsTime(log10)-F304_R1.csv
+
+*** Computing growth phases *** 
+
+Plot saved in:  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F304_R1\GrowthPhasesbasedonmu-F304_R1.pdf
+saving final data in csv format :  C:\Users\duquet\Documents\GitHub\Clustering_Microbial-growth\test2\F304_R1\GrowthPhasesbasedonmu-F304_R1.csv
